@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SahakarSaathi | Cooperative help in your own language</title>
+  <meta name="description" content="Ask about cooperative laws, PACS services, PMFBY crop insurance, loans and complaints in Hindi, Marathi and other Indian languages. Type or speak.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;600;800&family=Anek+Devanagari:wght@400;600;800&family=Noto+Sans+Gujarati:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Sans+Kannada:wght@400;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231F5F3B'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23F2B01E'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="#top" aria-label="SahakarSaathi home">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+      <circle cx="17" cy="17" r="16" fill="#1F5F3B"/>
+      <g fill="#F5F7F0">
+        <circle cx="17" cy="7" r="2.6"/><circle cx="25.7" cy="12" r="2.6"/><circle cx="25.7" cy="22" r="2.6"/>
+        <circle cx="17" cy="27" r="2.6"/><circle cx="8.3" cy="22" r="2.6"/><circle cx="8.3" cy="12" r="2.6"/>
+      </g>
+      <circle cx="17" cy="17" r="4.2" fill="#F2B01E"/>
+    </svg>
+    <span>SahakarSaathi</span>
+  </a>
+  <nav aria-label="Main">
+    <a href="#topics">What you can ask</a>
+    <a href="#how">How it works</a>
+    <a href="#kiosk">At your PACS</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- HERO: greeting + live chat -->
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="greet" id="greet" aria-hidden="true">नमस्कार</p>
+      <h1>Ask about cooperatives, schemes and crop insurance in your own language.</h1>
+      <p class="lede">Type or speak your question. You get a simple answer with the source document shown. Free to use.</p>
+
+      <p class="label" id="lang-label">Choose your language</p>
+      <div class="langs" id="langs" role="group" aria-labelledby="lang-label"></div>
+    </div>
+
+    <div class="chat" id="chat" aria-label="Chat with SahakarSaathi">
+      <div class="chat-head">
+        <div>
+          <strong>SahakarSaathi</strong>
+          <span class="chat-sub" id="chat-sub">Answering in English</span>
+        </div>
+        <button class="icon-btn" id="speaker" type="button" aria-pressed="false" title="Read answers aloud">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3 10v4h4l5 4V6L7 10H3z" fill="currentColor"/><path id="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+          <span class="sr-only">Read answers aloud</span>
+        </button>
+      </div>
+
+      <div class="messages" id="messages" role="log" aria-live="polite"></div>
+
+      <div class="chips" id="chips"></div>
+
+      <div class="composer">
+        <button class="mic" id="mic" type="button" title="Speak your question" aria-label="Speak your question">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <input id="input" type="text" autocomplete="off" maxlength="800" placeholder="Type your question" aria-label="Your question">
+        <button class="send" id="send" type="button">Send</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <p class="fine">General guidance from official documents, not legal advice. For your own case, check with your PACS secretary or the Registrar of Cooperative Societies.</p>
+    </div>
+  </section>
+
+  <!-- TOPICS -->
+  <section class="block" id="topics">
+    <h2>What you can ask</h2>
+    <p class="block-lede">Pick a topic to see an example question answered.</p>
+    <ul class="topics">
+      <li>
+        <div><h3>Cooperative laws and by-laws</h3><p>Your rights as a member, how the board and general body work, elections and audits.</p></div>
+        <button type="button" class="ask" data-q="What are my rights as a member of a cooperative society?">Try it</button>
+      </li>
+      <li>
+        <div><h3>Ministry of Cooperation schemes</h3><p>PACS computerisation, new multipurpose PACS, grain storage and national cooperatives.</p></div>
+        <button type="button" class="ask" data-q="What schemes does the Ministry of Cooperation run for PACS and farmers?">Try it</button>
+      </li>
+      <li>
+        <div><h3>PACS services</h3><p>Crop loans, seeds and fertiliser, storage, common service centres and more.</p></div>
+        <button type="button" class="ask" data-q="What services can I get from my PACS?">Try it</button>
+      </li>
+      <li>
+        <div><h3>PMFBY crop insurance</h3><p>Who can enrol, what you pay, what is covered and how to report crop loss.</p></div>
+        <button type="button" class="ask" data-q="My crop was damaged by hailstorm. How do I claim PMFBY insurance?">Try it</button>
+      </li>
+      <li>
+        <div><h3>Loans and Kisan Credit Card</h3><p>How a crop loan works, interest, repayment and what to keep in mind before borrowing.</p></div>
+        <button type="button" class="ask" data-q="How does a Kisan Credit Card loan work and what is the interest?">Try it</button>
+      </li>
+      <li>
+        <div><h3>Complaints and grievances</h3><p>Who to approach first, and where to go if nothing happens.</p></div>
+        <button type="button" class="ask" data-q="My PACS is not giving me a loan I am eligible for. Where do I complain?">Try it</button>
+      </li>
+    </ul>
+  </section>
+
+  <!-- HOW -->
+  <section class="block alt" id="how">
+    <h2>How an answer is made</h2>
+    <ol class="steps">
+      <li><strong>You ask.</strong> Type, or press the microphone and speak in your language.</li>
+      <li><strong>We look up official documents.</strong> The assistant finds the matching pages in the Acts, by-laws and scheme guidelines it has been given.</li>
+      <li><strong>You get a plain answer.</strong> It is written in your language, with the names of the documents it used. If the documents do not have the answer, it says so and tells you who to ask.</li>
+    </ol>
+  </section>
+
+  <!-- KIOSK -->
+  <section class="block" id="kiosk">
+    <h2>At your PACS office</h2>
+    <p class="block-lede">No smartphone? A voice kiosk at the society office lets you speak your question and hear the answer. It opens this same page, so the answers are always up to date.</p>
+    <div class="kiosk-note">
+      <p><strong>Kiosk set-up:</strong> a Raspberry Pi or tablet with a microphone and speaker, running this page in full-screen mode.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p><strong>SahakarSaathi</strong> is built for Smart India Hackathon 2026, problem statement SIH26088. It is an information tool and is not an official government service.</p>
+  <p>Official information: <a href="https://www.cooperation.gov.in" target="_blank" rel="noopener">Ministry of Cooperation</a> and <a href="https://pmfby.gov.in" target="_blank" rel="noopener">PMFBY portal</a>.</p>
+</footer>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
