@@ -34,11 +34,23 @@ Open http://localhost:5000 in **Chrome or Edge** (voice input needs them).
 
 Notes: the free plan sleeps after ~15 minutes idle, so the first visit after a break takes ~30-60 seconds. Open the site before your demo to wake it. Voice output needs a voice for that language installed on the device (Android phones and Chrome usually have Hindi and Marathi).
 
-## 3. Add or change the knowledge
+## 3. Admin dashboard
+
+Go to `/admin` on your site (e.g. `https://your-site.onrender.com/admin`) to add, edit or delete knowledge documents from a browser, no code needed. Set these in `.env` (locally) and in Render's Environment tab (for the live site):
+```
+SECRET_KEY=any_random_text
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=choose_a_strong_password
+```
+Changes take effect on the next question asked, no restart needed.
+
+**Important limitation on Render's free plan:** the disk is not permanently saved. Documents you add or edit through `/admin` can be lost the next time the service redeploys or restarts. Use `/admin` for quick fixes and testing, but for anything you want to keep, also copy the final text into a file in `knowledge/` on your laptop and push it with git, so it's safely stored in GitHub too.
+
+## 4. Add or change the knowledge
 
 Drop `.md`, `.txt` or text-based `.pdf` files into `knowledge/` and redeploy (git push). The first line of each file is shown as the source name. The bundled files are a starter summary: **replace or check them against the official Acts, by-laws and scheme guidelines before you present.**
 
-## 4. Hardware kiosk (Raspberry Pi)
+## 5. Hardware kiosk (Raspberry Pi)
 
 Connect a USB mic and speaker, then:
 ```bash

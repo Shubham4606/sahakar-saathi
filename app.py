@@ -12,7 +12,7 @@ from collections import defaultdict, deque
 
 import numpy as np
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from google import genai
 from google.genai import types
 
@@ -56,6 +56,22 @@ Cooperative Societies. For crop insurance, mention helpline 14447.
 7. Be polite and never lecture. If the question is unrelated to the topics above, politely say what you can help with."""
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "dev-only-change-me")
+
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+
+
+def admin_required(view):
+    from functools import wraps
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("admin"):
+            return redirect(url_for("admin_login", next=request.path))
+        return view(*args, **kwargs)
+
+    return wrapped
 
 # ------------------------------------------------------------------ Gemini client
 _client = None
@@ -156,6 +172,32 @@ def ensure_index():
             except OSError:
                 pass
         _index["chunks"], _index["vecs"] = chunks, vecs
+
+
+def reset_index():
+    """Call this after a document is added, edited or deleted so the next question re-reads the knowledge folder."""
+    with _lock:
+        _index["chunks"], _index["vecs"] = None, None
+    if os.path.exists(CACHE_FILE):
+        try:
+            os.remove(CACHE_FILE)
+        except OSError:
+            pass
+
+
+def kb_files():
+    files = []
+    for ext in ("md", "txt", "pdf"):
+        files += glob.glob(os.path.join(KB_DIR, f"*.{ext}"))
+    return sorted(os.path.basename(f) for f in files)
+
+
+def safe_kb_path(filename):
+    """Prevent path traversal: only allow a plain filename inside the knowledge folder."""
+    name = os.path.basename(filename or "")
+    if not name or name != filename or not name.lower().endswith((".md", ".txt")):
+        return None
+    return os.path.join(KB_DIR, name)
 
 
 def retrieve(query):
@@ -269,6 +311,109 @@ def feedback():
     data = request.get_json(silent=True) or {}
     app.logger.info("FEEDBACK %s", json.dumps({"helpful": data.get("helpful"), "q": str(data.get("question", ""))[:200]}))
     return jsonify(ok=True)
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        u = (request.form.get("username") or "").strip()
+        p = request.form.get("password") or ""
+        if not ADMIN_PASSWORD:
+            flash("Admin login is not set up yet. Add ADMIN_PASSWORD in your .env file.")
+        elif u == ADMIN_USERNAME and p == ADMIN_PASSWORD:
+            session["admin"] = True
+            return redirect(request.args.get("next") or url_for("admin_dashboard"))
+        else:
+            flash("Wrong username or password.")
+    return render_template("admin_login.html")
+
+
+@app.get("/admin/logout")
+def admin_logout():
+    session.pop("admin", None)
+    return redirect(url_for("admin_login"))
+
+
+@app.get("/admin")
+@admin_required
+def admin_dashboard():
+    docs = []
+    for name in kb_files():
+        path = os.path.join(KB_DIR, name)
+        try:
+            text = read_file(path)
+        except Exception:
+            text = ""
+        first_line = next((l.strip("# ").strip() for l in text.splitlines() if l.strip()), name)
+        docs.append({
+            "name": name,
+            "title": first_line,
+            "size": os.path.getsize(path),
+            "editable": name.lower().endswith((".md", ".txt")),
+        })
+    return render_template("admin_dashboard.html", docs=docs)
+
+
+@app.route("/admin/new", methods=["GET", "POST"])
+@admin_required
+def admin_new():
+    if request.method == "POST":
+        name = (request.form.get("filename") or "").strip()
+        if not name.lower().endswith(".md"):
+            name += ".md"
+        path = safe_kb_path(name)
+        content = request.form.get("content") or ""
+        if not path:
+            flash("Please give a simple file name, letters/numbers/hyphens only, ending in .md")
+        elif os.path.exists(path):
+            flash("A file with that name already exists. Choose a different name or edit the existing one.")
+        elif not content.strip():
+            flash("Please add some content before saving.")
+        else:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            reset_index()
+            flash(f'Saved "{name}". The assistant will use it from the next question.')
+            return redirect(url_for("admin_dashboard"))
+    return render_template("admin_edit.html", mode="new", name="", content="")
+
+
+@app.route("/admin/edit/<path:filename>", methods=["GET", "POST"])
+@admin_required
+def admin_edit(filename):
+    path = safe_kb_path(filename)
+    if not path or not os.path.exists(path):
+        flash("That document was not found, or it is a PDF (PDFs can't be edited here).")
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
+        content = request.form.get("content") or ""
+        if not content.strip():
+            flash("Content can't be empty. To remove this document, use Delete instead.")
+        else:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            reset_index()
+            flash(f'Updated "{filename}".')
+            return redirect(url_for("admin_dashboard"))
+        content_to_show = content
+    else:
+        content_to_show = read_file(path)
+
+    return render_template("admin_edit.html", mode="edit", name=filename, content=content_to_show)
+
+
+@app.post("/admin/delete/<path:filename>")
+@admin_required
+def admin_delete(filename):
+    path = safe_kb_path(filename)
+    if path and os.path.exists(path):
+        os.remove(path)
+        reset_index()
+        flash(f'Deleted "{filename}".')
+    else:
+        flash("That document was not found.")
+    return redirect(url_for("admin_dashboard"))
 
 
 if __name__ == "__main__":

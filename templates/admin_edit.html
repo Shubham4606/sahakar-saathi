@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'New document' if mode == 'new' else 'Edit ' + name }} | SahakarSaathi admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body class="admin-body">
+  <header class="admin-head">
+    <strong>SahakarSaathi admin</strong>
+    <nav><a href="{{ url_for('home') }}">View website</a><a href="{{ url_for('admin_logout') }}">Log out</a></nav>
+  </header>
+
+  <main class="admin-main">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<p class="admin-flash">{{ messages[0] }}</p>{% endif %}
+    {% endwith %}
+
+    <p><a href="{{ url_for('admin_dashboard') }}">&larr; All documents</a></p>
+    <h1>{{ 'New document' if mode == 'new' else 'Edit document' }}</h1>
+
+    <form method="post" class="admin-form">
+      {% if mode == 'new' %}
+        <label for="filename">File name</label>
+        <input id="filename" name="filename" placeholder="10-my-topic.md" required>
+        <p class="admin-hint">Letters, numbers and hyphens, ending in .md. The first line becomes the title shown as the answer's source.</p>
+      {% else %}
+        <p><strong>{{ name }}</strong></p>
+      {% endif %}
+
+      <label for="content">Content</label>
+      <textarea id="content" name="content" rows="22" placeholder="# Document title&#10;&#10;Write the guidance here, in your own words, based on the official document.">{{ content }}</textarea>
+      <p class="admin-hint">Start with a "# Title" line. Use plain paragraphs &mdash; the assistant will quote from this text, so keep it clear and correct.</p>
+
+      <div class="admin-form-actions">
+        <button type="submit" class="admin-btn">Save</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-cancel">Cancel</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

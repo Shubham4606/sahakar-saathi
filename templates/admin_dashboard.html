@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | SahakarSaathi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body class="admin-body">
+  <header class="admin-head">
+    <strong>SahakarSaathi admin</strong>
+    <nav><a href="{{ url_for('home') }}">View website</a><a href="{{ url_for('admin_logout') }}">Log out</a></nav>
+  </header>
+
+  <main class="admin-main">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}<p class="admin-flash ok">{{ messages[0] }}</p>{% endif %}
+    {% endwith %}
+
+    <div class="admin-toolbar">
+      <h1>Knowledge documents</h1>
+      <a class="admin-btn" href="{{ url_for('admin_new') }}">+ New document</a>
+    </div>
+    <p class="admin-note">These are the documents the assistant answers from. Changes apply to the next question people ask &mdash; no restart needed.</p>
+
+    <table class="admin-table">
+      <thead><tr><th>Title</th><th>File</th><th>Size</th><th></th></tr></thead>
+      <tbody>
+        {% for d in docs %}
+        <tr>
+          <td>{{ d.title }}</td>
+          <td><code>{{ d.name }}</code></td>
+          <td>{{ (d.size / 1024) | round(1) }} KB</td>
+          <td class="admin-actions">
+            {% if d.editable %}
+              <a href="{{ url_for('admin_edit', filename=d.name) }}">Edit</a>
+              <form method="post" action="{{ url_for('admin_delete', filename=d.name) }}" onsubmit="return confirm('Delete {{ d.name }}? This cannot be undone.');">
+                <button type="submit" class="admin-link-btn">Delete</button>
+              </form>
+            {% else %}
+              <span class="admin-muted">PDF &mdash; view only</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No documents yet. Add one to get started.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
